@@ -57,6 +57,9 @@ PLIST_DIRS=	%%JAVAJARDIR%%/${PORTNAME} \
 post-extract:
 	${MKDIR} ${WRKSRC_kotlinzip}
 	${CP} ${DISTDIR}/${DIST_SUBDIR}/kotlin-compiler-1.2.71.zip ${WRKSRC_kotlinzip}/
+	${TOUCH} ${WRKSRC_kotlinzip}/touch.txt
+	#Command below must be changed sometime with a more approproate version....
+	unzip ${WRKSRC_kotlinzip}/kotlin-compiler-1.2.71.zip -d ${WRKSRC_kotlinzip}/
 
 post-patch:
 	@${REINPLACE_CMD} -e 's|%GCCVER%|${_USE_GCC}|g' \
