@@ -1,8 +1,10 @@
-# $FreeBSD: $
+# $FreeBSD$
 
 PORTNAME=	lwjgl
 DISTVERSION=	3.2.0
 CATEGORIES=	games java
+MASTER_SITES=	https://github.com/JetBrains/kotlin/releases/download/v1.2.71/:kotlinzip
+DISTFILES=	kotlin-compiler-1.2.71.zip:kotlinzip
 
 MAINTAINER=	mmokhi@FreeBSD.org
 COMMENT=	Lightweight Java Game Library
@@ -16,48 +18,45 @@ RUN_DEPENDS:=	${BUILD_DEPENDS}
 
 ONLY_FOR_ARCHS=	i386 amd64
 
+USES=		pkgconfig
+USE_ANT=	yes
+USE_GCC=	yes
+USE_GNOME=	glib20 gtk30
 USE_JAVA=	yes
 USE_LDCONFIG=	yes
+USE_XORG=	xcursor xrandr xxf86vm
+JAVA_VERSION=	1.7+
+JAVA_OS=	native
+JAVA_VENDOR=	openjdk
+
+LWJGL_BUILD_ARCH=	${ARCH:S/amd/X/:S/i3/X/}
+WRKSRC_kotlinzip=	${WRKSRC}/bin/libs/
+
+.for _group in ${_GITHUB_GROUPS:NDEFAULT}
+EXTRACT_ONLY:=	${EXTRACT_ONLY} ${DISTFILE_${_group}}:${_group}
+.endfor
 
 USE_GITHUB=	yes
 GH_ACCOUNT=	LWJGL
 GH_PROJECT=	lwjgl3
 GH_TAGNAME=	b60d7f9
+####GH_TUPLE=	JetBrains:kotlin:v1.2.71:kotlinc/bin/libs
 
-JAVA_VERSION=	1.7+
-JAVA_OS=	native
-JAVA_VENDOR=	openjdk
-USE_ANT=	yes
-USE_GCC=	yes
-USE_XORG=	xcursor xrandr xxf86vm
-USES=		pkgconfig
-USE_GNOME=	glib20 gtk30
-MAKE_ENV+=	CLASSPATH=${JAVALIBDIR}/jutils/jutils.jar:${JAVALIBDIR}/jinput/jinput.jar:${WRKSRC}/${DISTNAME}/jar/
-ALL_TARGET=	jars compile_native
+MAKE_ENV+=	CLASSPATH=${JAVALIBDIR}/jutils/jutils.jar:${JAVALIBDIR}/jinput/jinput.jar:${WRKSRC}/${DISTNAME}/jar/ \
+		LWJGL_BUILD_ARCH=${LWJGL_BUILD_ARCH} #### LWJGL_BUILD_OFFLINE=yes
 
 PLIST_FILES=	%%JAVAJARDIR%%/${PORTNAME}/${PORTNAME}.jar \
 		%%JAVAJARDIR%%/${PORTNAME}/${PORTNAME}_test.jar \
 		%%JAVAJARDIR%%/${PORTNAME}/${PORTNAME}_util.jar \
-		%%JAVAJARDIR%%/${PORTNAME}/${PORTNAME}_util_applet.jar
+		%%JAVAJARDIR%%/${PORTNAME}/${PORTNAME}_util_applet.jar \
+		lib/${PORTNAME}${PORTVERSION}/lib${PORTNAME}.so
 PLIST_DIRS=	%%JAVAJARDIR%%/${PORTNAME} \
 		lib/${PORTNAME}${PORTVERSION}
 
-.include <bsd.port.pre.mk>
 
-.if ${ARCH} == i386
-PLIST_FILES+=	lib/${PORTNAME}${PORTVERSION}/lib${PORTNAME}.so
-LWJGL_BUILD_ARCH=x86
-.endif
-
-.if ${ARCH} == amd64
-PLIST_FILES+=	lib/${PORTNAME}${PORTVERSION}/lib${PORTNAME}64.so
-LWJGL_BUILD_ARCH=x64
-.endif
-
-MAKE_ENV+=	LWJGL_BUILD_ARCH=${LWJGL_BUILD_ARCH} LWJGL_BUILD_OFFLINE=yes
-#Getting: https://github.com/JetBrains/kotlin/releases/download/v1.2.71/kotlin-compiler-1.2.71.zip
-#  [kotlinc] To: /wrkdirs/usr/ports/games/lwjgl3/work/lwjgl3-b60d7f9/bin/libs/kotlin-compiler-1.2.71.zip
-#
+post-extract:
+	${MKDIR} ${WRKSRC_kotlinzip}
+	${CP} ${DISTDIR}/${DIST_SUBDIR}/kotlin-compiler-1.2.71.zip ${WRKSRC_kotlinzip}/
 
 post-patch:
 	@${REINPLACE_CMD} -e 's|%GCCVER%|${_USE_GCC}|g' \
@@ -70,13 +69,7 @@ do-install:
 		${STAGEDIR}${JAVAJARDIR}/${PORTNAME}
 .endfor
 	@${MKDIR} ${STAGEDIR}${PREFIX}/lib/${PORTNAME}${PORTVERSION}
-.if ${ARCH} == i386
 	${INSTALL_DATA} ${WRKSRC}/libs/freebsd/lib${PORTNAME}.so \
 		${STAGEDIR}${PREFIX}/lib/${PORTNAME}${PORTVERSION}
-.endif
-.if ${ARCH} == amd64
-	${INSTALL_DATA} ${WRKSRC}/libs/freebsd/lib${PORTNAME}64.so \
-		${STAGEDIR}${PREFIX}/lib/${PORTNAME}${PORTVERSION}
-.endif
 
-.include <bsd.port.post.mk>
+.include <bsd.port.mk>

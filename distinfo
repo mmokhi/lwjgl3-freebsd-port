@@ -1,3 +1,5 @@
-TIMESTAMP = 1543167909
+TIMESTAMP = 1543273859
+SHA256 (kotlin-compiler-1.2.71.zip) = e48292fdfed42f44230bc01f92ffd17002101d8c5aeedfa3dba3cb29c5b6ea7b
+SIZE (kotlin-compiler-1.2.71.zip) = 37179301
 SHA256 (LWJGL-lwjgl3-3.2.0-b60d7f9_GH0.tar.gz) = 3f698a7135a6c232c226a772c32a7df84afd2abd8ed9726b6290dfd957e5836a
 SIZE (LWJGL-lwjgl3-3.2.0-b60d7f9_GH0.tar.gz) = 7677556
